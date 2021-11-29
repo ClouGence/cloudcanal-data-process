@@ -13,6 +13,6 @@ public class OneFactTableOneDimensionTableProcessor implements CloudCanalProcess
 
     @Override
     public List<CustomRecord> process(List<CustomRecord> records, CustomProcessorContext context) {
-        return null;
+        return records;
     }
 }
