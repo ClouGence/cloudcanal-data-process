@@ -1,16 +1,5 @@
 package com.clougence.cloudcanal.dataprocess.widetable;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import com.clougence.cloudcanal.sdk.api.CloudCanalProcessor;
 import com.clougence.cloudcanal.sdk.api.constant.rdb.RecordAction;
 import com.clougence.cloudcanal.sdk.api.contextkey.RdbContextKey;
@@ -19,11 +8,20 @@ import com.clougence.cloudcanal.sdk.api.model.CustomField;
 import com.clougence.cloudcanal.sdk.api.model.CustomProcessorContext;
 import com.clougence.cloudcanal.sdk.api.model.CustomRecord;
 import com.clougence.cloudcanal.sdk.api.service.impl.RecordBuilder;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author bucketli 2021/11/29 23:07:26
  */
-public class OneFactTableOneDimensionTableProcessor implements CloudCanalProcessor {
+public class WideTableProcessor implements CloudCanalProcessor {
 
     @Override
     public List<CustomRecord> process(List<CustomRecord> records, CustomProcessorContext context) {
