@@ -81,8 +81,8 @@
 
     <repositories>
         <repository>
-            <id>central</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>rdc-snapshots</id>
+            <url>https://packages.aliyun.com/maven/repository/2012878-snapshot-wXHWRP/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
