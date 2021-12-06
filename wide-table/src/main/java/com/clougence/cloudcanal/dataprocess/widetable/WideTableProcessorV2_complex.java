@@ -132,16 +132,6 @@ public class WideTableProcessorV2_complex implements CloudCanalProcessorV2 {
         return sb.toString();
     }
 
-    protected CustomFieldV2 findCol(List<CustomFieldV2> fields, String targetFieldName) {
-        for (CustomFieldV2 field : fields) {
-            if (field.getFieldName().equals(targetFieldName)) {
-                return field;
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public List<CustomData> process(CustomData data) {
         List<CustomData> re = new ArrayList<>();
@@ -175,10 +165,10 @@ public class WideTableProcessorV2_complex implements CloudCanalProcessorV2 {
                     switch (data.getEventType()) {
                         case INSERT:
                         case UPDATE:
-                            f = findCol(recordV2.getAfterColumns(), keyMap.getKey());
+                            f = recordV2.getAfterColumnMap().get(keyMap.getKey());
                             break;
                         case DELETE:
-                            f = findCol(recordV2.getBeforeColumns(), keyMap.getKey());
+                            f = recordV2.getBeforeColumnMap().get(keyMap.getKey());
                             break;
                         default:
                             throw new IllegalArgumentException("unsupported event type:" + data.getEventType());
@@ -261,12 +251,8 @@ public class WideTableProcessorV2_complex implements CloudCanalProcessorV2 {
         }
 
         public void addJoinKeyToRecord(List<CustomFieldV2> addCols) {
-            if (recordV2.getBeforeColumns() != null && !recordV2.getBeforeColumns().isEmpty()) {
-                recordV2.getBeforeColumns().addAll(addCols);
-            }
-
-            if (recordV2.getAfterColumns() != null && !recordV2.getAfterColumns().isEmpty()) {
-                recordV2.getAfterColumns().addAll(addCols);
+            for (CustomFieldV2 fieldV2 : addCols) {
+                this.recordV2.addField(fieldV2);
             }
         }
 

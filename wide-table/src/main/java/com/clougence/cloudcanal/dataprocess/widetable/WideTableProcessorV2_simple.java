@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -45,16 +46,6 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
         addCols.add(CustomFieldV2.buildField("worker_name", null, Types.VARCHAR, false, true, true));
     }
 
-    protected CustomFieldV2 findCol(List<CustomFieldV2> fields, String targetFieldName) {
-        for (CustomFieldV2 field : fields) {
-            if (field.getFieldName().equals(targetFieldName)) {
-                return field;
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public List<CustomData> process(CustomData data) {
         List<CustomData> re = new ArrayList<>();
@@ -76,18 +67,19 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
             List<CustomRecordV2> records = new ArrayList<>();
 
             for (CustomRecordV2 recordV2 : data.getRecords()) {
-                List<CustomFieldV2> factJoinKeys = new ArrayList<>();
-                List<CustomFieldV2> factAddCols = new ArrayList<>();
+                LinkedHashMap<String, CustomFieldV2> factJoinKeys = new LinkedHashMap<>();
+                LinkedHashMap<String, CustomFieldV2> factAddCols = new LinkedHashMap<>();
 
-                CustomFieldV2 jf = findCol(recordV2.getBeforeKeyColumns(), dimensionTableJoinKey.getFieldName());
+                CustomFieldV2 jf = recordV2.getBeforeColumnMap().get(dimensionTableJoinKey.getFieldName());
                 CustomFieldV2 factJoinKey = CustomFieldV2
                     .buildField(factTableJoinKey.getFieldName(), jf.getValue(), factTableJoinKey.getSqlType(), true, jf.getValue() == null, false);
 
-                factAddCols.add(factJoinKey);
-                factJoinKeys.add(factJoinKey);
+                factAddCols.put(factJoinKey.getFieldName(), factJoinKey);
+                factJoinKeys.put(factJoinKey.getFieldName(), factJoinKey);
                 for (CustomFieldV2 addCol : addCols) {
-                    CustomFieldV2 af = findCol(recordV2.getAfterColumns(), addCol.getFieldName());
-                    factAddCols.add(CustomFieldV2.buildField(addCol.getFieldName(), af.getValue(), addCol.getSqlType(), addCol.isKey(), af.getValue() == null, true));
+                    CustomFieldV2 af = recordV2.getAfterColumnMap().get(addCol.getFieldName());
+                    CustomFieldV2 newField = CustomFieldV2.buildField(addCol.getFieldName(), af.getValue(), addCol.getSqlType(), addCol.isKey(), af.getValue() == null, true);
+                    factAddCols.put(newField.getFieldName(), newField);
                 }
 
                 CustomRecordV2 r = CustomRecordV2.buildRecord(factAddCols, factAddCols, factJoinKeys, factJoinKeys);
@@ -100,17 +92,18 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
             List<CustomRecordV2> records = new ArrayList<>();
 
             for (CustomRecordV2 recordV2 : data.getRecords()) {
-                List<CustomFieldV2> factJoinKeys = new ArrayList<>();
-                List<CustomFieldV2> factAddCols = new ArrayList<>();
+                LinkedHashMap<String, CustomFieldV2> factJoinKeys = new LinkedHashMap<>();
+                LinkedHashMap<String, CustomFieldV2> factAddCols = new LinkedHashMap<>();
 
-                CustomFieldV2 jf = findCol(recordV2.getBeforeKeyColumns(), dimensionTableJoinKey.getFieldName());
+                CustomFieldV2 jf = recordV2.getBeforeColumnMap().get(dimensionTableJoinKey.getFieldName());
                 CustomFieldV2 factJoinKey = CustomFieldV2
                     .buildField(factTableJoinKey.getFieldName(), jf.getValue(), factTableJoinKey.getSqlType(), true, jf.getValue() == null, false);
 
-                factAddCols.add(factJoinKey);
-                factJoinKeys.add(factJoinKey);
+                factAddCols.put(factJoinKey.getFieldName(), factJoinKey);
+                factJoinKeys.put(factJoinKey.getFieldName(), factJoinKey);
                 for (CustomFieldV2 addCol : addCols) {
-                    factAddCols.add(CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true));
+                    CustomFieldV2 newField = CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true);
+                    factAddCols.put(newField.getFieldName(), newField);
                 }
 
                 CustomRecordV2 r = CustomRecordV2.buildRecord(factAddCols, factAddCols, factJoinKeys, factJoinKeys);
@@ -152,10 +145,10 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
             switch (data.getEventType()) {
                 case INSERT:
                 case UPDATE:
-                    f = findCol(recordV2.getAfterColumns(), factTableJoinKey.getFieldName());
+                    f = recordV2.getAfterColumnMap().get(factTableJoinKey.getFieldName());
                     break;
                 case DELETE:
-                    f = findCol(recordV2.getBeforeColumns(), factTableJoinKey.getFieldName());
+                    f = recordV2.getBeforeColumnMap().get(factTableJoinKey.getFieldName());
                     break;
                 default:
                     throw new IllegalArgumentException("unsupported event type:" + data.getEventType());
@@ -168,13 +161,13 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
                         for (CustomFieldV2 addCol : addCols) {
                             String val = rs.getString(addCol.getFieldName());
                             CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), val, addCol.getSqlType(), addCol.isKey(), val == null, true);
-                            addJoinKeyToRecord(recordV2, cf);
+                            recordV2.addField(cf);
                         }
                     } else {
                         // add empty cols
                         for (CustomFieldV2 addCol : addCols) {
                             CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true);
-                            addJoinKeyToRecord(recordV2, cf);
+                            recordV2.addField(cf);
                         }
                     }
                 }
@@ -189,15 +182,5 @@ public class WideTableProcessorV2_simple implements CloudCanalProcessorV2 {
     @Override
     public void stop() {
         // do nothing
-    }
-
-    public void addJoinKeyToRecord(CustomRecordV2 recordV2, CustomFieldV2 addCol) {
-        if (recordV2.getBeforeColumns() != null && !recordV2.getBeforeColumns().isEmpty()) {
-            recordV2.getBeforeColumns().add(addCol);
-        }
-
-        if (recordV2.getAfterColumns() != null && !recordV2.getAfterColumns().isEmpty()) {
-            recordV2.getAfterColumns().add(addCol);
-        }
     }
 }
