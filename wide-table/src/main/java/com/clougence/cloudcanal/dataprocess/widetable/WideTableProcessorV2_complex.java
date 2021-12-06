@@ -20,6 +20,8 @@ import com.clougence.cloudcanal.sdk.api.modelv2.CustomRecordV2;
 import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
 
 /**
+ * not complete yet.use WideTableProcessorV2_simple instead.
+ * 
  * @author bucketli 2021/11/29 23:07:26
  */
 public class WideTableProcessorV2_complex implements CloudCanalProcessorV2 {
