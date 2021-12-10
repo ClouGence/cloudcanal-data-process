@@ -20,7 +20,7 @@ import com.clougence.cloudcanal.sdk.api.modelv2.*;
 /**
  * @author bucketli 2021/11/29 23:07:26
  */
-public class WideTableProcessorV2_user_1 implements CloudCanalProcessorV2 {
+public class MySqlToMySql_user_1 implements CloudCanalProcessorV2 {
 
     private DataSource          srcDataSource;
 
