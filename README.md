@@ -18,3 +18,8 @@
 - 子工程下 `mvn -Dtest -DfailIfNoTests=false -Dmaven.javadoc.skip=true -Dmaven.compile.fork=true clean package` 打包
 - CloudCanal 控制台创建任务，并上传子工程 target 下 jar 包(如:wide-table-1.0.0-SNAPSHOT.jar)
 
+#### 案例文章
+
+[5分钟搞定分库分表数据汇聚-CloudCanal实战](https://www.askcug.com/topic/255)
+[5分钟搞定 MySQL 到 ClickHouse 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/249)
+[5分钟搞定 MySQL 到 ElasticSearch 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/240)
