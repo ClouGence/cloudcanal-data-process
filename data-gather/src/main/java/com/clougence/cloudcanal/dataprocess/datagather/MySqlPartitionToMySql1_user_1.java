@@ -53,7 +53,12 @@ public class MySqlPartitionToMySql1_user_1 implements CloudCanalProcessorV2 {
                     recordV2.getAfterKeyColumnMap().put(dataRegion.getFieldName(), dataRegion);
                     break;
                 }
-                case UPDATE:
+                case UPDATE: {
+                    recordV2.getAfterColumnMap().put(dataRegion.getFieldName(), dataRegion);
+                    recordV2.getAfterKeyColumnMap().put(dataRegion.getFieldName(), dataRegion);
+                    recordV2.getBeforeColumnMap().put(dataRegion.getFieldName(), dataRegion);
+                    recordV2.getBeforeKeyColumnMap().put(dataRegion.getFieldName(), dataRegion);
+                }
                 case DELETE: {
                     recordV2.getBeforeColumnMap().put(dataRegion.getFieldName(), dataRegion);
                     recordV2.getBeforeKeyColumnMap().put(dataRegion.getFieldName(), dataRegion);
