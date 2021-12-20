@@ -25,6 +25,7 @@
         <module>wide-table</module>
         <module>business-alert</module>
         <module>data-compare</module>
+        <module>data-gather</module>
     </modules>
 
     <dependencyManagement>
