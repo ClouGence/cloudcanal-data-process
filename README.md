@@ -20,6 +20,6 @@
 
 #### 案例文章
 
-[5分钟搞定分库分表数据汇聚-CloudCanal实战](https://www.askcug.com/topic/255)
-[5分钟搞定 MySQL 到 ClickHouse 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/249)
-[5分钟搞定 MySQL 到 ElasticSearch 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/240)
+- [5分钟搞定分库分表数据汇聚-CloudCanal实战](https://www.askcug.com/topic/255)
+- [5分钟搞定 MySQL 到 ClickHouse 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/249)
+- [5分钟搞定 MySQL 到 ElasticSearch 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/240)
