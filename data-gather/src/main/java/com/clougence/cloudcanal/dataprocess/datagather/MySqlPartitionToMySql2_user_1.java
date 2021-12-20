@@ -13,8 +13,6 @@ import com.clougence.cloudcanal.sdk.api.modelv2.CustomRecordV2;
 import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
 
 /**
- * 对端对于insert必须使用 Upsert 策略
- * 
  * @author bucketli 2021/11/29 23:07:26
  */
 public class MySqlPartitionToMySql2_user_1 implements CloudCanalProcessorV2 {
