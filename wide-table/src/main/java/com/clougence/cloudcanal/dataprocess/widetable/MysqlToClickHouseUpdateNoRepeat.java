@@ -12,6 +12,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 功能描述:mysql同步到clickHouse防止修改重复数据
@@ -21,6 +23,7 @@ import java.util.List;
  * @Date 2021-12-23 17:23
  */
 public class MysqlToClickHouseUpdateNoRepeat implements CloudCanalProcessor {
+    protected static final Logger customLogger = LoggerFactory.getLogger("custom_processor");
     /**
      * 库
      */
@@ -70,7 +73,7 @@ public class MysqlToClickHouseUpdateNoRepeat implements CloudCanalProcessor {
                 }
             }
         }catch (Exception e){
-            e.printStackTrace();
+            customLogger.error(e.getMessage());
         }
     }
 }
