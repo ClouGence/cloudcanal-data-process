@@ -13,11 +13,11 @@
 - **business-alert** : 业务告警插件，根据数据变化趋势做出相应告警
 
 #### 使用说明
-
+- [安装 CloudCanal 并创建数据迁移同步任务](https://doc-cloudcanal.clougence.com/quick/quick_start)
 - 将需要使用的 CloudCanalProcessor 实现类(如:WideTableProcessorV2_simple)进行适配性改造
 - 子工程下 src/main/resources/META-INF/cloudcanal/plugin.properties 中修改为需要使用的类
 - 子工程下 `mvn -Dtest -DfailIfNoTests=false -Dmaven.javadoc.skip=true -Dmaven.compile.fork=true clean package` 打包
-- CloudCanal 控制台创建任务，并上传**子工程** target 下 jar 包(如:wide-table-1.0.0-SNAPSHOT.jar)
+- CloudCanal 控制台创建任务(**参考案例文章**)，并上传**子工程** target 下 jar 包(如:wide-table-1.0.0-SNAPSHOT.jar)
 
 #### 案例文章
 
