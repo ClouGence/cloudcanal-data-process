@@ -1,4 +1,4 @@
-package com.clougence.cloudcanal.dataprocess.widetable;
+package com.clougence.cloudcanal.dataprocess.datatransform;
 
 import java.sql.Types;
 import java.util.ArrayList;

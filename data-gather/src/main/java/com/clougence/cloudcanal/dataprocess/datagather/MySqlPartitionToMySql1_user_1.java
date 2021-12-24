@@ -15,6 +15,8 @@ import com.clougence.cloudcanal.sdk.api.modelv2.CustomRecordV2;
 import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
 
 /**
+ * 对端主键为源端主键+额外字段 region。从而达到多地汇聚数据不冲突的目的。
+ * 
  * @author bucketli 2021/11/29 23:07:26
  */
 public class MySqlPartitionToMySql1_user_1 implements CloudCanalProcessorV2 {
