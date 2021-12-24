@@ -1,5 +1,15 @@
 package com.clougence.cloudcanal.dataprocess.widetable;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.clougence.cloudcanal.sdk.api.CloudCanalProcessor;
 import com.clougence.cloudcanal.sdk.api.constant.rdb.RecordAction;
 import com.clougence.cloudcanal.sdk.api.contextkey.RdbContextKey;
@@ -8,51 +18,42 @@ import com.clougence.cloudcanal.sdk.api.model.CustomField;
 import com.clougence.cloudcanal.sdk.api.model.CustomProcessorContext;
 import com.clougence.cloudcanal.sdk.api.model.CustomRecord;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 功能描述:mysql同步到clickHouse防止修改重复数据
- * @param
- * @return
+ *
  * @author yisai
  * @Date 2021-12-23 17:23
  */
 public class MysqlToClickHouseUpdateNoRepeat implements CloudCanalProcessor {
+
     protected static final Logger customLogger = LoggerFactory.getLogger("custom_processor");
     /**
      * 库
      */
-    private String schemaName;
+    private String                schemaName;
     /**
      * 表
      */
-    private String tableName;
+    private String                tableName;
     /**
      * 主键
      */
-    private Long primaryKey;
+    private Long                  primaryKey;
     /**
      * 动作
      */
-    private String actionName;
+    private String                actionName;
 
     @Override
     public List<CustomRecord> process(List<CustomRecord> customRecordList, CustomProcessorContext customProcessorContext) {
-        //修改同步前先删除对端库老数据
-        updateRecord(customRecordList,(DataSource) customProcessorContext.getProcessorContextMap().get(RdbContextKey.TARGET_DATASOURCE));
+        // 修改同步前先删除对端库老数据
+        updateRecord(customRecordList, (DataSource) customProcessorContext.getProcessorContextMap().get(RdbContextKey.TARGET_DATASOURCE));
         return customRecordList;
     }
 
     /**
-     * 功能描述:修改同步前先删除对端库老数据
-     * 注意主键要放在表第一个字段
-     * @param
-     * @return
+     * 功能描述:修改同步前先删除对端库老数据 注意主键要放在表第一个字段
+     *
      * @author yisai
      * @Date 2021-12-23 17:00
      */
@@ -72,8 +73,8 @@ public class MysqlToClickHouseUpdateNoRepeat implements CloudCanalProcessor {
                     ps.execute();
                 }
             }
-        }catch (Exception e){
-            customLogger.error(e.getMessage());
+        } catch (Exception e) {
+            customLogger.error(ExceptionUtils.getRootCauseMessage(e), e);
         }
     }
 }
