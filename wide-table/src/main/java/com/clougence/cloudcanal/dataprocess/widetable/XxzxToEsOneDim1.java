@@ -1,51 +1,49 @@
 package com.clougence.cloudcanal.dataprocess.widetable;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.clougence.cloudcanal.sdk.api.CloudCanalProcessorV2;
 import com.clougence.cloudcanal.sdk.api.JavaDsType;
 import com.clougence.cloudcanal.sdk.api.ProcessorContext;
-import com.clougence.cloudcanal.sdk.api.modelv2.CustomData;
-import com.clougence.cloudcanal.sdk.api.modelv2.CustomFieldV2;
-import com.clougence.cloudcanal.sdk.api.modelv2.CustomRecordV2;
-import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.clougence.cloudcanal.sdk.api.modelv2.*;
 
 /**
  * @author bucketli 2021/12/29 18:47:47
  */
 public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
 
-    private DataSource          srcDataSource;
+    protected static final Logger log                     = LoggerFactory.getLogger("custom_processor");
+
+    private DataSource            srcDataSource;
 
     // 事实表定义(fact table definition)
 
-    private SchemaInfo          factTable               = new SchemaInfo(null, "dingtax", "xxzx_xxzb");
+    private SchemaInfo            factTable               = new SchemaInfo(null, "dingtax", "xxzx_xxzb");
 
     // 第二个维表定义(2nd dimension table definition)
 
-    private SchemaInfo          dimensionTable_2        = new SchemaInfo(null, "dingtax", "bi_dm_swjg");
+    private SchemaInfo            dimensionTable_2        = new SchemaInfo(null, "dingtax", "bi_dm_swjg");
 
     // 第二个维表关联字段在事实表上的定义(2nd dimension table's join key definition in fact table)
 
-    private CustomFieldV2       factTableJoinKey_2      = CustomFieldV2.buildField("xnzz_id", null, Types.BIGINT, false, false, true);
+    private CustomFieldV2         factTableJoinKey_2      = CustomFieldV2.buildField("xnzz_id", null, Types.BIGINT, false, false, true);
 
     // 第二个维表关联字段在维表上的字段定义(2nd dimension table's join key definition in dimension table)
 
-    private CustomFieldV2       dimensionTableJoinKey_2 = CustomFieldV2.buildField("xnzz_id", null, Types.BIGINT, false, false, true);;
+    private CustomFieldV2         dimensionTableJoinKey_2 = CustomFieldV2.buildField("xnzz_id", null, Types.BIGINT, false, false, true);;
 
-    private List<CustomFieldV2> srcCols_2               = new ArrayList<>();
+    private List<CustomFieldV2>   srcCols_2               = new ArrayList<>();
 
-    private List<CustomFieldV2> addCols_2               = new ArrayList<>();
+    private List<CustomFieldV2>   addCols_2               = new ArrayList<>();
 
     @Override
     public void start(ProcessorContext context) {
@@ -63,7 +61,7 @@ public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
     public List<CustomData> process(CustomData data) {
         List<CustomData> re = new ArrayList<>();
         if (data.getSchemaInfo().equals(factTable)) {
-            handleFactTable(2, data, dimensionTable_2, factTableJoinKey_2, dimensionTableJoinKey_2, addCols_2, srcCols_2);
+            data = handleFactTable(data, dimensionTable_2, factTableJoinKey_2, dimensionTableJoinKey_2, addCols_2, srcCols_2);
             re.add(data);
         } else {
             re.add(data);
@@ -73,19 +71,10 @@ public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
 
     }
 
-    /**
-     * @param type 1 关联部门，2关联机关
-     */
-    protected String genDimensionQuerySql(int type, List<CustomFieldV2> srcCols, SchemaInfo dimensionTable, CustomFieldV2 dimensionTableJoinKey) {
-        StringBuilder sb = new StringBuilder("SELECT ");
-        boolean first = true;
+    protected String genDimensionQuerySql(List<CustomFieldV2> srcCols, SchemaInfo dimensionTable, CustomFieldV2 dimensionTableJoinKey) {
+        StringBuilder sb = new StringBuilder("SELECT `swjg_dm`");
         for (CustomFieldV2 addCol : srcCols) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append(",");
-            }
-
+            sb.append(",");
             sb.append("`").append(addCol.getFieldName()).append("`");
         }
 
@@ -98,49 +87,27 @@ public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
         return sb.toString();
     }
 
-    protected void handleFactTable(int type, CustomData data, SchemaInfo dimensionTable, CustomFieldV2 factTableJoinKey, CustomFieldV2 dimensionTableJoinKey,
-                                   List<CustomFieldV2> addCols, List<CustomFieldV2> srcCols) {
-        String sql = genDimensionQuerySql(type, srcCols, dimensionTable, dimensionTableJoinKey);
+    protected CustomData handleFactTable(CustomData data, SchemaInfo dimensionTable, CustomFieldV2 factTableJoinKey, CustomFieldV2 dimensionTableJoinKey,
+                                         List<CustomFieldV2> addCols, List<CustomFieldV2> srcCols) {
+        String sql = genDimensionQuerySql(srcCols, dimensionTable, dimensionTableJoinKey);
+        List<CustomRecordV2> newRecords = new ArrayList<>();
         for (CustomRecordV2 recordV2 : data.getRecords()) {
-            CustomFieldV2 f;
-            switch (data.getEventType()) {
-                case INSERT:
-                case UPDATE:
-                    f = recordV2.getAfterColumnMap().get(factTableJoinKey.getFieldName());
-                    break;
-                case DELETE:
-                    f = recordV2.getBeforeColumnMap().get(factTableJoinKey.getFieldName());
-                    break;
-                default:
-                    throw new IllegalArgumentException("unsupported event type:" + data.getEventType());
-            }
+            CustomFieldV2 f = fetchNewestField(data.getEventType(), recordV2, factTableJoinKey.getFieldName());
 
             try (Connection conn = srcDataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setObject(1, f.getValue(), dimensionTableJoinKey.getSqlType());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        for (int i = 0; i < addCols.size(); i++) {
-                            CustomFieldV2 srcCol = srcCols.get(i);
-                            String val = rs.getString(srcCol.getFieldName());
-                            if (val != null) {
-                                String[] swjgDms = val.split("-");
-                                List<Long> longDms = new ArrayList<>();
-                                for (String d : swjgDms) {
-                                    longDms.add(Long.valueOf(d));
-                                }
+                        CustomRecordV2 nOne = genNewRecord(recordV2, f, data.getEventType(), rs, addCols, srcCols);
+                        newRecords.add(nOne);
 
-                                CustomFieldV2 addCol = addCols.get(i);
-                                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(),longDms.toArray(), addCol.getSqlType(), addCol.isKey(), false, true);
-                                recordV2.addField(cf);
-                            } else {
-                                CustomFieldV2 addCol = addCols.get(i);
-                                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true);
-                                recordV2.addField(cf);
-                            }
+                        while (rs.next()) {
+                            CustomRecordV2 more = genNewRecord(recordV2, f, data.getEventType(), rs, addCols, srcCols);
+                            newRecords.add(more);
                         }
                     } else {
-                        // add empty cols
                         for (CustomFieldV2 addCol : addCols) {
+                            // 如果没查到记录改主键值么？
                             CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true);
                             recordV2.addField(cf);
                         }
@@ -149,6 +116,99 @@ public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
             } catch (Exception e) {
                 throw new RuntimeException("process error.msg:" + ExceptionUtils.getRootCauseMessage(e), e);
             }
+
+        }
+
+        return new CustomData(data.getSchemaInfo(), data.getEventType(), newRecords);
+    }
+
+    protected CustomRecordV2 genNewRecord(CustomRecordV2 origin, CustomFieldV2 joinKey, EventTypeInSdk eventType, ResultSet rs, List<CustomFieldV2> addCols,
+                                          List<CustomFieldV2> srcCols) throws SQLException {
+        CustomRecordV2 newOne = deepCopyRecord(origin);
+        CustomFieldV2 pk = fetchNewestField(eventType, newOne, "id");
+
+        for (int i = 0; i < addCols.size(); i++) {
+            CustomFieldV2 srcCol = srcCols.get(i);
+            String swjgDmVal = rs.getString("swjg_dm");
+            String val = rs.getString(srcCol.getFieldName());
+            if (val != null) {
+                String[] swjgDms = val.split("-");
+                List<Long> longDms = new ArrayList<>();
+                for (String d : swjgDms) {
+                    longDms.add(Long.valueOf(d));
+                }
+
+                CustomFieldV2 addCol = addCols.get(i);
+                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), longDms.toArray(), addCol.getSqlType(), addCol.isKey(), false, true);
+                newOne.addField(cf);
+
+                String newPk = pk.getValue().toString().concat(joinKey.getValue().toString()).concat(swjgDmVal);
+
+                // 使用你自己的主键生成策略
+                long newPkNum = Math.abs(newPk.hashCode());
+
+                fillColVal(newOne, "id", newPkNum);
+            } else {
+                // 如果查到的记录里面值为空改主键么？
+                CustomFieldV2 addCol = addCols.get(i);
+                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), null, addCol.getSqlType(), addCol.isKey(), true, true);
+                newOne.addField(cf);
+            }
+        }
+
+        return newOne;
+    }
+
+    protected void fillColVal(CustomRecordV2 target, String col, Object newVal) {
+        CustomFieldV2 ak = target.getAfterKeyColumnMap().get(col);
+        if (ak != null) {
+            ak.setValue(newVal);
+        }
+
+        CustomFieldV2 ac = target.getAfterColumnMap().get(col);
+        if (ac != null) {
+            ac.setValue(newVal);
+        }
+
+        CustomFieldV2 bk = target.getBeforeKeyColumnMap().get(col);
+        if (bk != null) {
+            bk.setValue(newVal);
+        }
+
+        CustomFieldV2 bc = target.getBeforeColumnMap().get(col);
+        if (bc != null) {
+            bc.setValue(newVal);
+        }
+    }
+
+    protected CustomRecordV2 deepCopyRecord(CustomRecordV2 origin) {
+        CustomRecordV2 newOne = new CustomRecordV2();
+        newOne.setBeforeColumnMap(deepCopyFields(origin.getBeforeColumnMap()));
+        newOne.setBeforeKeyColumnMap(deepCopyFields(origin.getBeforeKeyColumnMap()));
+        newOne.setAfterColumnMap(deepCopyFields(origin.getAfterColumnMap()));
+        newOne.setAfterKeyColumnMap(deepCopyFields(origin.getAfterKeyColumnMap()));
+        return newOne;
+    }
+
+    protected LinkedHashMap<String, CustomFieldV2> deepCopyFields(LinkedHashMap<String, CustomFieldV2> fields) {
+        LinkedHashMap<String, CustomFieldV2> fs = new LinkedHashMap<>();
+        for (CustomFieldV2 f : fields.values()) {
+            CustomFieldV2 newF = CustomFieldV2.buildField(f.getFieldName(), f.getValue(), f.getSqlType(), f.isKey(), f.isNull(), f.isUpdated());
+            fs.put(newF.getFieldName(), newF);
+        }
+
+        return fs;
+    }
+
+    protected CustomFieldV2 fetchNewestField(EventTypeInSdk eventType, CustomRecordV2 recordV2, String fieldName) {
+        switch (eventType) {
+            case INSERT:
+            case UPDATE:
+                return recordV2.getAfterColumnMap().get(fieldName);
+            case DELETE:
+                return recordV2.getBeforeColumnMap().get(fieldName);
+            default:
+                throw new IllegalArgumentException("unsupported event type:" + eventType);
         }
     }
 
