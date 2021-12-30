@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,13 +134,10 @@ public class XxzxToEsOneDim1 implements CloudCanalProcessorV2 {
             String val = rs.getString(srcCol.getFieldName());
             if (val != null) {
                 String[] swjgDms = val.split("-");
-                List<Long> longDms = new ArrayList<>();
-                for (String d : swjgDms) {
-                    longDms.add(Long.valueOf(d));
-                }
+                String s = "[" + StringUtils.join(swjgDms, ",") + "]";
 
                 CustomFieldV2 addCol = addCols.get(i);
-                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), longDms.toArray(), addCol.getSqlType(), addCol.isKey(), false, true);
+                CustomFieldV2 cf = CustomFieldV2.buildField(addCol.getFieldName(), s, addCol.getSqlType(), addCol.isKey(), false, true);
                 newOne.addField(cf);
 
                 String newPk = pk.getValue().toString().concat(joinKey.getValue().toString()).concat(swjgDmVal);
