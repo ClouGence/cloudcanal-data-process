@@ -37,6 +37,8 @@ public class MySqlToEsNoDelete implements CloudCanalProcessorV2 {
                         updateRecord.getAfterKeyColumnMap().put(afterField.getKey(), afterField.getValue());
                     }
                 }
+
+                updateRecords.add(updateRecord);
             }
 
             CustomData updateData = new CustomData(data.getSchemaInfo(), EventTypeInSdk.UPDATE, updateRecords);
