@@ -67,7 +67,7 @@ public class MysqlToClickHouseUpdateNoRepeat implements CloudCanalProcessor {
                     tableName = customRecord.getRecordMetaMap().get(RdbMetaKey.TABLE_NAME).toString();
                     int endIndex = customRecord.getFieldMapBefore().toString().indexOf("=");
                     String primaryKeyName = customRecord.getFieldMapBefore().toString().substring(1, endIndex);
-                    CustomField primaryKeyCustomField = (CustomField) customRecord.getFieldMapBefore().get(primaryKeyName);
+                    CustomField primaryKeyCustomField = customRecord.getFieldMapBefore().get(primaryKeyName);
                     primaryKey = Long.parseLong(primaryKeyCustomField.getValue().toString());
                     PreparedStatement ps = connection.prepareStatement("ALTER TABLE " + schemaName + "." + tableName + " DELETE WHERE " + primaryKeyName + " = " + primaryKey);
                     ps.execute();

@@ -22,8 +22,7 @@ public class MySqlToChNoUpdate implements CloudCanalProcessorV2 {
     public List<CustomData> process(CustomData data) {
         List<CustomData> re = new ArrayList<>();
         if (data.getEventType() == EventTypeInSdk.UPDATE) {
-            List<CustomRecordV2> deleteRecords = new ArrayList<>();
-            List<CustomRecordV2> insertRecords = new ArrayList<>();
+
             for (CustomRecordV2 oriRecord : data.getRecords()) {
                 CustomRecordV2 deleteRecord = new CustomRecordV2();
                 CustomRecordV2 insertRecord = new CustomRecordV2();
@@ -43,27 +42,25 @@ public class MySqlToChNoUpdate implements CloudCanalProcessorV2 {
                     fillColumnMap(f.getValue(), insertRecord.getAfterKeyColumnMap());
                 }
 
+                List<CustomRecordV2> deleteRecords = new ArrayList<>();
+                List<CustomRecordV2> insertRecords = new ArrayList<>();
                 deleteRecords.add(deleteRecord);
                 insertRecords.add(insertRecord);
+
+                SchemaInfo deleteSchemaInfo = data.cloneSchemaInfo(data.getSchemaInfo());
+                CustomData deleteData = new CustomData(deleteSchemaInfo, EventTypeInSdk.DELETE, deleteRecords);
+
+                SchemaInfo insertSchemaInfo = data.cloneSchemaInfo(data.getSchemaInfo());
+                CustomData insertData = new CustomData(insertSchemaInfo, EventTypeInSdk.INSERT, insertRecords);
+
+                re.add(deleteData);
+                re.add(insertData);
             }
-
-            SchemaInfo deleteSchemaInfo = cloneSchemaInfo(data.getSchemaInfo());
-            CustomData deleteData = new CustomData(deleteSchemaInfo, EventTypeInSdk.DELETE, deleteRecords);
-
-            SchemaInfo insertSchemaInfo = cloneSchemaInfo(data.getSchemaInfo());
-            CustomData insertData = new CustomData(insertSchemaInfo, EventTypeInSdk.INSERT, insertRecords);
-
-            re.add(deleteData);
-            re.add(insertData);
         } else {
             re.add(data);
         }
 
         return re;
-    }
-
-    protected SchemaInfo cloneSchemaInfo(SchemaInfo oriSchema) {
-        return new SchemaInfo(oriSchema.getCatalog(), oriSchema.getSchema(), oriSchema.getTable());
     }
 
     protected void fillColumnMap(CustomFieldV2 oriBf, LinkedHashMap<String, CustomFieldV2> target) {
