@@ -1,5 +1,12 @@
 package com.clougence.cloudcanal.dataprocess.datatransform;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.clougence.cloudcanal.sdk.api.CloudCanalProcessorV2;
 import com.clougence.cloudcanal.sdk.api.ProcessorContext;
 import com.clougence.cloudcanal.sdk.api.modelv2.CustomData;
@@ -7,21 +14,16 @@ import com.clougence.cloudcanal.sdk.api.modelv2.CustomFieldV2;
 import com.clougence.cloudcanal.sdk.api.modelv2.CustomRecordV2;
 import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
 
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 纯粹打数据日志
  * 
  * @author bucketli 2021/11/29 23:07:26
  */
 public class AppKeyConvertToBoundSysKey implements CloudCanalProcessorV2 {
+
     protected static final Logger vehUserLogger = LoggerFactory.getLogger("AppKeyConvertToBoundSysKey");
 
-    private SchemaInfo targetTable = new SchemaInfo(null, "uat_appserver", "APP_KEY");
+    private SchemaInfo            targetTable   = new SchemaInfo(null, "uat_appserver", "APP_KEY");
 
     @Override
     public void start(ProcessorContext context) {
@@ -33,22 +35,55 @@ public class AppKeyConvertToBoundSysKey implements CloudCanalProcessorV2 {
         vehUserLogger.info("start process......");
         List<CustomData> re = new ArrayList<>();
         if (data.getSchemaInfo().equals(targetTable)) {
-            for (CustomRecordV2 recordV2 : data.getRecords()) {
-                if (recordV2.getAfterColumnMap().get("status").getValue() != null) {
-                    String status = recordV2.getAfterColumnMap().get("status").getValue().toString();
-                    if ("DISABLED".equals(status)) {
-                        status = "0";
-                    } else if ("ACTIVE".equals(status)) {
-                        status = "1";
+            switch (data.getEventType()) {
+                case INSERT: {
+                    for (CustomRecordV2 recordV2 : data.getRecords()) {
+                        changeStatusColumnValue(recordV2.getAfterColumnMap());
                     }
-                    recordV2.getAfterColumnMap().get("status").setValue(status);
-//                    newRecords.add(recordV2);
+                    break;
                 }
+                case UPDATE: {
+                    for (CustomRecordV2 recordV2 : data.getRecords()) {
+                        changeStatusColumnValue(recordV2.getBeforeColumnMap());
+                    }
+
+                    for (CustomRecordV2 recordV2 : data.getRecords()) {
+                        changeStatusColumnValue(recordV2.getAfterColumnMap());
+                    }
+                    break;
+                }
+                case DELETE: {
+                    for (CustomRecordV2 recordV2 : data.getRecords()) {
+                        changeStatusColumnValue(recordV2.getBeforeColumnMap());
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
         re.add(data);
         return re;
+    }
+
+    protected void changeStatusColumnValue(LinkedHashMap<String, CustomFieldV2> columns) {
+        Object aStatus = columns.get("status").getValue();
+        if (aStatus != null) {
+            String status = changeStatus(aStatus);
+            columns.get("status").setValue(status);
+        }
+    }
+
+    protected String changeStatus(Object oStatus) {
+        String status = oStatus.toString();
+        if ("DISABLED".equals(status)) {
+            return "0";
+        } else if ("ACTIVE".equals(status)) {
+            return "1";
+        } else {
+            return status;
+        }
     }
 
     @Override
