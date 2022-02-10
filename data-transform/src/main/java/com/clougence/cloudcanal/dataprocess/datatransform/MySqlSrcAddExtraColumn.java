@@ -16,7 +16,7 @@ import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
  * 
  * @author bucketli 2021/11/29 23:07:26
  */
-public class MySqlToMySqlAddExtraColumn implements CloudCanalProcessorV2 {
+public class MySqlSrcAddExtraColumn implements CloudCanalProcessorV2 {
 
     private SchemaInfo targetTable = new SchemaInfo(null, "dingtax", "worker_stats");
 
