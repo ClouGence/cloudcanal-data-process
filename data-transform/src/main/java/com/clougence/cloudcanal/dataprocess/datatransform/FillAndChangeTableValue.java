@@ -22,9 +22,9 @@ import com.clougence.cloudcanal.sdk.api.modelv2.SchemaInfo;
  */
 public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
 
-    protected static final Logger log      = LoggerFactory.getLogger("CUSTOM_PROCESS");
+    protected static final Logger log      = LoggerFactory.getLogger("custom_processor");
 
-    private SchemaInfo            srcTable = new SchemaInfo(null, "uat_appserver", "APP_KEY");
+    private final SchemaInfo      srcTable = new SchemaInfo(null, "uat_appserver", "APP_KEY");
 
     @Override
     public void start(ProcessorContext context) {
@@ -41,7 +41,7 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
                 case INSERT:
                 case UPDATE: {
                     for (CustomRecordV2 recordV2 : data.getRecords()) {
-                        Object status = recordV2.getAfterColumnMap().get("status");
+                        Object status = recordV2.getAfterColumnMap().get("status").getValue();
                         log.warn("status:" + status);
                         if (status == null || !"ACTIVE".equals(String.valueOf(status))) {
                             continue;
