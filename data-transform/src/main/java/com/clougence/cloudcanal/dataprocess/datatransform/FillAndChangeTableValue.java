@@ -39,6 +39,11 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
                 case INSERT:
                 case UPDATE: {
                     for (CustomRecordV2 recordV2 : data.getRecords()) {
+                        Object status = recordV2.getAfterColumnMap().get("status");
+                        if (status == null || !"ACTIVE".equals(String.valueOf(status))) {
+                            continue;
+                        }
+
                         changeStatusColumnValue(recordV2.getAfterColumnMap());
                         newRecords.add(recordV2);
                     }
