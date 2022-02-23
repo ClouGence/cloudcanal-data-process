@@ -50,10 +50,7 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
                     break;
                 }
                 case DELETE: {
-                    for (CustomRecordV2 recordV2 : data.getRecords()) {
-                        changeStatusColumnValue(recordV2.getBeforeColumnMap());
-                        newRecords.add(recordV2);
-                    }
+                    newRecords = data.getRecords();
                     break;
                 }
                 default:
