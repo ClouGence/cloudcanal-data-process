@@ -33,8 +33,10 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
     @Override
     public List<CustomData> process(CustomData data) {
         List<CustomData> re = new ArrayList<>();
-        List<CustomRecordV2> newRecords = new ArrayList<>();
+
         if (data.getSchemaInfo().equals(srcTable)) {
+            List<CustomRecordV2> newRecords = new ArrayList<>();
+
             switch (data.getEventType()) {
                 case INSERT:
                 case UPDATE: {
@@ -56,9 +58,13 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
                 default:
                     break;
             }
+
+            CustomData newData = new CustomData(srcTable, data.getEventType(), newRecords);
+            re.add(newData);
+        } else {
+            re.add(data);
         }
-        CustomData newData = new CustomData(srcTable, data.getEventType(), newRecords);
-        re.add(newData);
+
         return re;
     }
 
