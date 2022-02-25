@@ -24,7 +24,7 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
 
     protected static final Logger log      = LoggerFactory.getLogger("custom_processor");
 
-    private final SchemaInfo      srcTable = new SchemaInfo(null, "uat_appserver", "APP_KEY");
+    private final SchemaInfo      srcTable = new SchemaInfo(null, "uniq_test", "app_key");
 
     @Override
     public void start(ProcessorContext context) {
@@ -41,9 +41,9 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
                 case INSERT:
                 case UPDATE: {
                     for (CustomRecordV2 recordV2 : data.getRecords()) {
-                        Object status = recordV2.getAfterColumnMap().get("status").getValue();
-                        log.warn("status:" + status);
-                        if (status == null || !"ACTIVE".equals(String.valueOf(status))) {
+                        CustomFieldV2 statusF = recordV2.getAfterColumnMap().get("status");
+                        Object status = statusF.getValue();
+                        if (statusF.isNull() || !"ACTIVE".equals(String.valueOf(status))) {
                             continue;
                         }
 
@@ -76,7 +76,7 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
     }
 
     private void fillNullCreateTime(LinkedHashMap<String, CustomFieldV2> columns) {
-        if (columns.get("createdTime").getValue() == null) {
+        if (columns.get("createdTime").isNull()) {
             columns.get("createdTime").setValue(fetchStrNowTime());
             columns.get("createdTime").setNull(false);
             columns.get("createdTime").setKey(false);
@@ -86,7 +86,7 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
     }
 
     private void fillNullCreatedBy(LinkedHashMap<String, CustomFieldV2> columns) {
-        if (columns.get("createdBy").getValue() == null) {
+        if (columns.get("createdBy").isNull()) {
             columns.get("createdBy").setValue("system");
             columns.get("createdBy").setNull(false);
             columns.get("createdBy").setKey(false);
@@ -96,9 +96,9 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
     }
 
     private void changeActiveStatus(LinkedHashMap<String, CustomFieldV2> columns) {
-        Object aStatus = columns.get("status").getValue();
-        if (aStatus != null) {
-            String val = String.valueOf(aStatus);
+        CustomFieldV2 status = columns.get("status");
+        if (!status.isNull()) {
+            String val = String.valueOf(status.getValue());
             if ("ACTIVE".equals(val)) {
                 columns.get("status").setValue("1");
                 columns.get("status").setNull(false);
@@ -109,8 +109,9 @@ public class FillAndChangeTableValue implements CloudCanalProcessorV2 {
         }
     }
 
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private String fetchStrNowTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return LocalDateTime.now().format(formatter);
     }
 
