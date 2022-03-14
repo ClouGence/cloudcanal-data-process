@@ -30,7 +30,7 @@ public class MySqlAddCol_user_1_simple implements CloudCanalProcessorV2 {
 
     private DataSource            srcDataSource;
 
-    private final SchemaInfo      factTable    = new SchemaInfo(null, "trade", "my_order");
+    private final SchemaInfo      factTable    = new SchemaInfo(null, "cc_test", "my_order");
 
     @Override
     public void start(ProcessorContext context) {
@@ -55,7 +55,7 @@ public class MySqlAddCol_user_1_simple implements CloudCanalProcessorV2 {
         return re;
     }
 
-    String userSql = "select name from trade.user where id=?";
+    String userSql = "select name from cc_test.user where id=?";
 
     protected void fillUserInfo(CustomData data) {
         for (CustomRecordV2 recordV2 : data.getRecords()) {
@@ -89,7 +89,7 @@ public class MySqlAddCol_user_1_simple implements CloudCanalProcessorV2 {
         }
     }
 
-    String productSql = "select name,price from trade.product where id=?";
+    String productSql = "select name,price from cc_test.product where id=?";
 
     protected void fillProductInfo(CustomData data) {
         for (CustomRecordV2 recordV2 : data.getRecords()) {
