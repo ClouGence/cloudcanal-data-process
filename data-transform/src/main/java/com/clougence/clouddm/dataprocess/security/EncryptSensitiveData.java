@@ -17,6 +17,6 @@ public class EncryptSensitiveData implements ColProcess {
         }
 
         String strVal = String.valueOf(colValue);
-        return StringUtils.repeat("$", strVal.length());
+        return StringUtils.repeat("*", strVal.length());
     }
 }
