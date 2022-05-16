@@ -34,7 +34,7 @@
             <dependency>
                 <groupId>com.clougence.cloudcanal</groupId>
                 <artifactId>cloudcanal-sdk</artifactId>
-                <version>1.0.5-SNAPSHOT</version>
+                <version>1.0.6-SNAPSHOT</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -88,16 +88,16 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <id>rdc-snapshots</id>
-            <url>https://packages.aliyun.com/maven/repository/2012878-snapshot-wXHWRP/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>rdc-snapshots</id>-->
+<!--            <url>https://packages.aliyun.com/maven/repository/2012878-snapshot-wXHWRP/</url>-->
+<!--            <releases>-->
+<!--                <enabled>false</enabled>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 </project>
