@@ -20,7 +20,7 @@ public class EncryptSpecifiedColValue implements CloudCanalProcessorV2 {
 
     protected static final Logger log = LoggerFactory.getLogger("custom_processor");
 
-    private final SchemaInfo srcTable = new SchemaInfo("dingtax", "dingtax", "worker_stats", "my-038krddt737oxx9.dingtax.worker_stats");
+    private final SchemaInfo srcTable = new SchemaInfo(null, "dingtax", "worker_stats", "my-290p01yec6hp4xx.dingtax.worker_stats");
 
     @Override
     public void start(ProcessorContext context) {
