@@ -30,9 +30,9 @@ public class RecordLogger implements CloudCanalProcessorV2 {
     public List<CustomData> process(CustomData data) {
         try {
             String dataJson = new ObjectMapper().writeValueAsString(data);
-            customLogger.info("heihei ha. "+dataJson);
+            customLogger.info("in custom code. " + dataJson);
         } catch (Exception e) {
-            customLogger.error("heihei ha,log data error.msg:" + ExceptionUtils.getRootCauseMessage(e), e);
+            customLogger.error("in custom code,log data error.msg:" + ExceptionUtils.getRootCauseMessage(e), e);
         }
 
         List<CustomData> re = new ArrayList<>();
