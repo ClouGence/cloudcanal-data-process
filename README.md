@@ -1,26 +1,22 @@
 # cloudcanal-data-process
 
-#### 介绍
+## Overview
 
-本工程汇集了 CloudCanal 数据处理插件，以达成数据自定义 transformation 目标
+**Custom Code** allows users to write Java code with data processing logic , upload Java jar packages to [CloudCanal](https://www.clougence.com/), and CloudCanal automatically call these codes during **Full Data** and **Incremental** to achieve various data transformation processing purposes.
 
-#### 插件说明
+#### Project Description
 
-- **wide-table** : 打宽表数据处理插件，主要包括事实表和单维表组合处理
-- **data-transform** : 数据通用转换插件，比如做操作变幻、额外加字段、清洗回填数据
-- **data-gather** : 数据汇聚插件，将分库分表、垂直拆分、异地数据进行实时汇聚
-- **data-compare** : 数据对比插件，根据源端数据变化进行业务对账
-- **business-alert** : 业务告警插件，根据数据变化趋势做出相应告警
+- **wide-table** : The fact table and dimension tables join processing code.
+- **data-transform** : General data transformation code, e.g., doing operation changes, adding additional fields, filter data,and so on.
+- **data-gather** : Aggregate sharding data code.e.g.,eliminate constraint conflicts, adding additional fields and so on.
+- **data-compare** : Verification and correction with business logic.
+- **business-alert** : Provides corresponding alarms based on stream data.
 
-#### 使用说明
-- [安装 CloudCanal 并创建数据迁移同步任务](https://doc-cloudcanal.clougence.com/quick/quick_start)
-- 将需要使用的 CloudCanalProcessor 实现类(如:WideTableProcessorV2_simple)进行适配性改造
-- 子工程下 src/main/resources/META-INF/cloudcanal/plugin.properties 中修改为需要使用的类
-- 子工程下 `mvn -Dtest -DfailIfNoTests=false -Dmaven.javadoc.skip=true -Dmaven.compile.fork=true clean package` 打包
-- CloudCanal 控制台创建任务(**参考案例文章**)，并上传**子工程** target 下 jar 包(如:wide-table-1.0.0-SNAPSHOT.jar)
+#### Steps
+- [Install CloudCanal](https://www.clougence.com/cc-doc/productOP/systemDeploy/install_linux_macos)
+- [Create an Custom Code DataJob](https://www.clougence.com/cc-doc/operation/job_manage/create_job/create_process_job)
+- DataJob running.
 
-#### 案例文章
-
-- [5分钟搞定分库分表数据汇聚-CloudCanal实战](https://www.askcug.com/topic/255)
-- [5分钟搞定 MySQL 到 ClickHouse 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/249)
-- [5分钟搞定 MySQL 到 ElasticSearch 宽表构建和同步-CloudCanal实战](https://www.askcug.com/topic/240)
+#### References
+- [Debug Custom Code](https://www.clougence.com/cc-doc/operation/job_manage/convenience_features/debug_customer_code)
+- [Log in Custom Code](https://www.clougence.com/cc-doc/operation/job_manage/convenience_features/log_in_customer_code)
