@@ -4,11 +4,16 @@
 
 ## Project Description
 
-- **wide-table** : The fact table and dimension tables join processing code.
-- **data-transform** : General data transformation code, e.g., doing operation changes, adding additional fields, filter data,and so on.
-- **data-gather** : Aggregate sharding data code.e.g.,eliminate constraint conflicts, adding additional fields and so on.
-- **data-compare** : Verification and correction with business logic.
-- **business-alert** : Provides corresponding alarms based on stream data.
+- **wide-table** 
+  - The fact table and dimension tables join processing code.
+- **data-transform** 
+  - General data transformation code, e.g., doing operation changes, adding additional fields, filter data,and so on.
+- **data-gather** 
+  - Aggregate sharding data code.e.g.,eliminate constraint conflicts, adding additional fields and so on.
+- **data-compare** 
+  - Verification and correction with business logic.
+- **business-alert** 
+  - Provides corresponding alarms based on stream data.
 
 ## Steps
 - [Install CloudCanal](https://www.clougence.com/cc-doc/productOP/systemDeploy/install_linux_macos)
