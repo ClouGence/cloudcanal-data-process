@@ -25,5 +25,5 @@
 - [Log in Custom Code](https://www.clougence.com/cc-doc/operation/job_manage/convenience_features/log_in_customer_code)
 
 ## README.md
-[English](README.md)
-[简体中文](readme/README.zh_CN.md)
+- [English](README.md)
+- [简体中文](readme/README.zh_CN.md)

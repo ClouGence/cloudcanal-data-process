@@ -23,5 +23,5 @@
 - [在自定义代码中打日志](https://www.clougence.com/cc-doc/operation/job_manage/convenience_features/log_in_customer_code)
 
 ## README.md
-[English](../README.md)
-[简体中文](README.zh_CN.md)
+- [English](../README.md)
+- [简体中文](README.zh_CN.md)
