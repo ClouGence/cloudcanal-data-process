@@ -1,3 +1,0 @@
-# cloudcanal-data-process
-
-TODO...
